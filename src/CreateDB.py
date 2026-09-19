@@ -54,6 +54,7 @@ def create_tables() -> None:
         employer_id int NOT NULL,
         requirement text NOT NULL,
         responsibility text NOT NULL,
+        alternate_url text NOT NULL,
         experience_id varchar(100) NOT NULL,
         experience_name varchar(100) NOT NULL,
         employment_id varchar(100) NOT NULL,
@@ -90,8 +91,8 @@ def insert_data(data: dict) -> None:
     for vacancy in data["items"]:
         cur.execute(
             """
-            INSERT INTO vacancies(vacancy_id, vacancy_name, area, salary_from, salary_to, currency, type, created_at, published_at, archived, employer_id, requirement, responsibility, experience_id, experience_name, employment_id, employment_name, schedule_id, schedule_name)
-            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO vacancies(vacancy_id, vacancy_name, area, salary_from, salary_to, currency, type, created_at, published_at, archived, employer_id, requirement, responsibility, alternate_url, experience_id, experience_name, employment_id, employment_name, schedule_id, schedule_name)
+            VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (vacancy_id) DO NOTHING;
             """,
             (
@@ -108,6 +109,7 @@ def insert_data(data: dict) -> None:
                 vacancy["employer"]["id"],
                 vacancy["snippet"]["requirement"],
                 vacancy["snippet"]["responsibility"],
+                vacancy["alternate_url"],
                 vacancy["experience"]["id"],
                 vacancy["experience"]["name"],
                 vacancy["employment"]["id"],
