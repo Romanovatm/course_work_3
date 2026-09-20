@@ -42,7 +42,7 @@ def main() -> None:
         if user_option == "4":
             DBManager.get_vacancies_with_higher_salary()
         if user_option == "5":
-            user_input = input("Введите слова для поиска через запятую: ").lower().split()
+            user_input = input("Введите слова для поиска через запятую: ").lower().split(",")
             DBManager.get_vacancies_with_keyword(user_input)
         if user_option == "0":
             break
