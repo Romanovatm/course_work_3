@@ -2,7 +2,7 @@ import json
 from typing import Any
 
 
-def file_manager(path: str) -> Any:
+def open_file_manager(path: str) -> Any:
     """
     Функция, читающая файл json формата.
     """
