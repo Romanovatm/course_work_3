@@ -8,15 +8,19 @@ class DBManager:
     Класс для подключения к БД.
     """
 
-    conn_params = {"host": "localhost", "database": "vacancies", "user": "postgres", "password": password}
+    def __init__(self) -> None:
+        """
+        Метод-конструктор класса.
+        """
 
-    @staticmethod
-    def get_companies_and_vacancies_count() -> None:
+        self.conn_params = {"host": "localhost", "database": "vacancies", "user": "postgres", "password": password}
+
+    def get_companies_and_vacancies_count(self) -> list:
         """
         Получает список всех компаний и количество вакансий у каждой компании.
         """
 
-        with psycopg2.connect(**DBManager.conn_params) as conn:
+        with psycopg2.connect(**self.conn_params) as conn:
             with conn.cursor() as cur:
                 cur.execute("""
                 SELECT employers.employer_name, COUNT(vacancies.vacancy_id) FROM vacancies
@@ -24,17 +28,15 @@ class DBManager:
                 GROUP BY employers.employer_name
                 """)
                 total_vacancies_from_employers = cur.fetchall()
-                for employer in total_vacancies_from_employers:
-                    print(f"Компания: {employer[0]} | Количество вакансий: {employer[1]}")
+                return list(total_vacancies_from_employers)
 
-    @staticmethod
-    def get_all_vacancies() -> None:
+    def get_all_vacancies(self) -> list:
         """
         Получает список всех вакансий с указанием названия компании, названия вакансии
         и зарплаты и ссылки на вакансию.
         """
 
-        with psycopg2.connect(**DBManager.conn_params) as conn:
+        with psycopg2.connect(**self.conn_params) as conn:
             with conn.cursor() as cur:
                 cur.execute("""
                 SELECT employers.employer_name, vacancies.vacancy_name,
@@ -45,19 +47,14 @@ class DBManager:
                 ORDER BY employers.employer_name, vacancies.vacancy_name
                 """)
                 result = cur.fetchall()
-                for employer in result:
-                    print(
-                        f"Компания: {employer[0]} | Вакансия: {employer[1]} | Диапазон: {employer[2]} | "
-                        f"Ссылка на вакансию: {employer[3]}"
-                    )
+                return list(result)
 
-    @staticmethod
-    def get_avg_salary() -> None:
+    def get_avg_salary(self) -> list:
         """
         Получает среднюю зарплату по вакансиям.
         """
 
-        with psycopg2.connect(**DBManager.conn_params) as conn:
+        with psycopg2.connect(**self.conn_params) as conn:
             with conn.cursor() as cur:
                 cur.execute("""
                 SELECT employers.employer_name,
@@ -67,16 +64,14 @@ class DBManager:
                 JOIN employers USING(employer_id)
                 """)
                 average_salary = cur.fetchall()
-                for vacancy in average_salary:
-                    print(f"Компания: {vacancy[0]} | Вакансия: {vacancy[1]} | Средняя: {vacancy[2]}")
+                return list(average_salary)
 
-    @staticmethod
-    def get_vacancies_with_higher_salary() -> None:
+    def get_vacancies_with_higher_salary(self) -> list:
         """
         Получает список всех вакансий, у которых зарплата выше средней по всем вакансиям.
         """
 
-        with psycopg2.connect(**DBManager.conn_params) as conn:
+        with psycopg2.connect(**self.conn_params) as conn:
             with conn.cursor() as cur:
                 cur.execute("""
                 SELECT employers.employer_name, vacancies.vacancy_name,
@@ -89,16 +84,9 @@ class DBManager:
                 (SELECT AVG((salary_from + vacancies.salary_to) / 2) FROM vacancies);
                 """)
                 avg_salary = cur.fetchall()
-                global_avg_sum = round(avg_salary[0][4])
-                print(f"--- Фильтрация идет относительно средней зарплаты по рынку: {global_avg_sum} руб. ---\n")
-                for vacancy in avg_salary:
-                    print(
-                        f"Компания: {vacancy[0]} | Вакансия: {vacancy[1]} | Диапазон: {vacancy[2]} "
-                        f"(Средняя: {round(vacancy[3])} руб.)"
-                    )
+                return list(avg_salary)
 
-    @staticmethod
-    def get_vacancies_with_keyword(user_input: list) -> None:
+    def get_vacancies_with_keyword(self, user_input: list) -> list:
         """
         Получает список всех вакансий, в названии которых содержатся переданные в метод слова,
         например python.
@@ -106,7 +94,7 @@ class DBManager:
 
         search_patterns = [f"%{word.strip()}%" for word in user_input if word.strip()]
 
-        with psycopg2.connect(**DBManager.conn_params) as conn:
+        with psycopg2.connect(**self.conn_params) as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     """
@@ -120,5 +108,4 @@ class DBManager:
                     (search_patterns,),
                 )
                 filter_vacancies = cur.fetchall()
-                for vacancy in filter_vacancies:
-                    print(f"Компания: {vacancy[0]} | Вакансия: {vacancy[1]} | Диапазон: {vacancy[2]}")
+                return list(filter_vacancies)
